@@ -16,13 +16,9 @@ public class PIDSubsystem1 extends PIDSubsystem {
         super(c);
         c.setTolerance(0.2);
         c.disableContinuousInput();
-
+    
         talonSRX1 = new WPI_TalonSRX(12);
-
-        // Use these to get going:
-        // setSetpoint() - Sets where the PID controller should move the system
-        // to
-        // enable() - Enables the PID controller.
+        enable();
     }
 
     @Override
