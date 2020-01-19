@@ -1,11 +1,6 @@
 package frc.robot.subsystems;
 
-import frc.robot.commands.*;
 import edu.wpi.first.wpilibj.command.PIDSubsystem;
-import edu.wpi.first.wpilibj.command.PIDSubsystem;
-import edu.wpi.first.wpilibj.PIDSource;
-import edu.wpi.first.wpilibj.PIDOutput;
-import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 /**
@@ -46,7 +41,7 @@ public class PIDSubsystem1 extends PIDSubsystem {
     }
 
     @Override
-    protected void usePIDOutput(double output) {
+    protected void usePIDOutput(final double output) {
         // Use output to drive your system, like a motor
         // e.g. yourMotor.set(output);
         talonSRX1.pidWrite(0.5);
