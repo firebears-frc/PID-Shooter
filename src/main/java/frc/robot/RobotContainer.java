@@ -1,7 +1,8 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.controller.PIDController;
-import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.PIDCommand;
 import frc.robot.subsystems.ShooterSubsystem;
 
 public class RobotContainer {
@@ -21,7 +22,7 @@ public class RobotContainer {
             controller,
             () -> 0.5,
             0.1,
-            (output, setpoint) -> shooterSubsystem.useOutput(output, setpoint),
+            null,
             shooterSubsystem
         );
     }
