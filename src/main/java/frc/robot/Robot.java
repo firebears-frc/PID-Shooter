@@ -28,10 +28,18 @@ public class Robot extends TimedRobot {
     }
 
     @Override
+    public void autonomousPeriodic() {
+    }
+
+    @Override
     public void teleopInit() {
         if (autonomousCommand != null)
             autonomousCommand.cancel();
         autonomousCommand = null;
+    }
+
+    @Override
+    public void teleopPeriodic() {
     }
 
     @Override

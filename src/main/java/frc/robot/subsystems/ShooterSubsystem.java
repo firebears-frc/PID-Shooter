@@ -22,4 +22,8 @@ public class ShooterSubsystem extends PIDSubsystem {
     protected void useOutput(double output, double setpoint) {
         srx.pidWrite(output);
     }
+
+    public void output(double output) {
+        srx.pidWrite(output);
+    }
 }

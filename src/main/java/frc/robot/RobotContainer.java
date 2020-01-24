@@ -14,15 +14,16 @@ public class RobotContainer {
     public RobotContainer() {
         controller = new PIDController(1.0, 0.0, 0.0);
         shooterSubsystem = new ShooterSubsystem(controller);
+        shooterSubsystem.setSetpoint(0.5);
         shooterSubsystem.setDefaultCommand(getAutonomousCommand());
     }
 
     public Command getAutonomousCommand() {
         return new PIDCommand(
             controller,
-            () -> 0.5,
+            () -> 0.2,
             0.1,
-            null,
+            (x) -> shooterSubsystem.output(x),
             shooterSubsystem
         );
     }
