@@ -4,6 +4,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class ShooterSubsystem extends SubsystemBase {
 
@@ -13,7 +14,10 @@ public class ShooterSubsystem extends SubsystemBase {
     static private final double I = 0.0;
     static private final double D = 0.0;
     static private final double F = 0.0;
-    static private final double RPM = 200.0;
+    static private final double RPM = 350.0 * 5.0;
+    static private final double SENSOR_UNITS_PER_REV = 4096;
+    static private final double GEAR_RATIO = 13.56;
+    static private final double PER_MINUTE_100_MS = 600.0;
 
     // private final WPI_TalonSRX srx;
     private final TalonSRX srx;
@@ -40,8 +44,12 @@ public class ShooterSubsystem extends SubsystemBase {
 
     public void periodic() {
         double output = srx.getMotorOutputPercent();
+        SmartDashboard.putNumber("Output", output);
+        int velocity = srx.getSelectedSensorVelocity(PID_LOOP_IDX);
+        SmartDashboard.putNumber("Velocity", velocity);
         // velocity in units per 100 ms
-        double targetVelocity = RPM * 4096 / 600;
+        double targetVelocity = RPM * SENSOR_UNITS_PER_REV
+            / (PER_MINUTE_100_MS * GEAR_RATIO);
         srx.set(ControlMode.Velocity, targetVelocity);
     }
 }
