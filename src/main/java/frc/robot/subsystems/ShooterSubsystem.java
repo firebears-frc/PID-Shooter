@@ -39,13 +39,12 @@ public class ShooterSubsystem extends SubsystemBase {
                         System.err.println("Error reading distance");
                         break;
                     }
-                    Timer.sleep(0.1);
+                    Timer.delay(0.1);
                 }
                 status = lidar.getStatus();
             }
-            lidar.stopContinuous();
         }
-    }
+    };
 
     public ShooterSubsystem() {
         super();

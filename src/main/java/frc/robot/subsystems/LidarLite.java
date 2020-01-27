@@ -102,7 +102,7 @@ public class LidarLite {
 
     /** Write a value to a register */
     private boolean write(Register reg, int value) {
-        lidar.write(reg.register, (byte) value);
+        return lidar.write(reg.register, (byte) value);
     }
 
     /** Read a byte value from a register */
