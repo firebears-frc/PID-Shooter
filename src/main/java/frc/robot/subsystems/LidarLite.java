@@ -3,59 +3,143 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.I2C;
 import java.nio.ByteBuffer;
 
+/** Class for LIDAR Lite v3 */
 public class LidarLite {
 
-    static private final byte LIDAR_ADDRESS = 0x62;
+    /** Bit to enable bulk read from a series of registers */
+    static private final byte BULK_REGISTER_BIT = (byte) (1 << 7);
 
-    private final I2C lidar = new I2C(I2C.Port.kMXP, LIDAR_ADDRESS);
+    /** Control registers */
+    static private enum Register {
+        /** Acquisition command */
+        ACQ_COMMAND(0x00),
+        /** Status flags */
+        STATUS(0x01),
+        /** Maximum number of acquisitions */
+        SIG_COUNT_VAL(0x02),
+        /** Acquisition configuration */
+        ACQ_CONFIG(0x04),
+        /** Distance measurement MSB */
+        DISTANCE_MSB(0x0F),
+        /** Distance measurement LSB */
+        DISTANCE_LSB(0x10),
+        /** Measurement burst count (OUTER_LOOP_COUNT) */
+        BURST_COUNT(0x11),
+        /** Number of measurement acquisitions when ACQ_CFG_REF_COUNT is set */
+        REF_COUNT_VAL(0x12),
+        /** Bypass peak detection threshold */
+        THRESHOLD_BYPASSS(0x1C),
+        /** Delay between measurements (5 ms units)
+         *  when ACQ_CFG_MEASURE_DELAY is set */
+        MEASURE_DELAY(0x45);
 
-    private final ByteBuffer buf = ByteBuffer.allocateDirect(2);
+        /** Register number */
+        public final byte register;
 
-    public LidarLite() {
+        /** Get register for a bulk read (more than 1 byte) */
+        public byte bulk() {
+            return (byte) (register | BULK_REGISTER_BIT);
+        }
 
+        /** Create a register */
+        private Register(int r) {
+            register = (byte) r;
+        }
     }
 
-    /** Acquisition mode control */
-    static private final byte ACQ_CONFIG_REG = 0x04;
+    /** Default I2C address of LIDAR Lite v3 */
+    static private final byte LIDAR_ADDRESS = 0x62;
 
-    static private final int ACQ_BIT_REF_PROCESS = 1 << 6;
-    static private final int ACQ_BIT_MEASURE_DELAY = 1 << 5;
-    static private final int ACQ_BIT_REF_FILTER = 1 << 4;
-    static private final int ACQ_BIT_QUICK_TERM = 1 << 3;
-    static private final int ACQ_BIT_DEFAULT_COUNT = 1 << 2;
-    static private final int ACQ_BITS_MODE = 0x03;
+    /** I2C for LIDAR Lite */
+    private final I2C lidar = new I2C(I2C.Port.kMXP, LIDAR_ADDRESS);
 
-    static private final byte OUTER_LOOP_COUNT = 0x11;
+    /** Data buffer */
+    private final ByteBuffer buf = ByteBuffer.allocate(2);
 
-    static private final byte ACQ_COMMAND = 0x00;
+    /** Create a new Lidar Lite */
+    public LidarLite() {
+        write(Register.ACQ_COMMAND, ACQ_CMD_RESET);
+    }
 
+    /** Status flags */
+    static public final int STATUS_SYSTEM_ERR = 1 << 6;
+    static public final int STATUS_HEALTH_OK = 1 << 5;
+    static public final int STATUS_SECONDARY_RETURN = 1 << 4;
+    static public final int STATUS_INVALID_SIGNAL = 1 << 3;
+    static public final int STATUS_SIGNAL_OVERFLOW = 1 << 2;
+    static public final int STATUS_REFERENCE_OVERFLOW = 1 << 1;
+    static public final int STATUS_BUSY = 1 << 0;
+
+    /** Acquisition commands (ACQ_COMMAND) */
     static private final byte ACQ_CMD_RESET = 0x00;
     static private final byte ACQ_CMD_MEASURE_NO_BIAS = 0x03;
     static private final byte ACQ_CMD_MEASURE = 0x04;
 
-    static private final byte MEASUREMENT = (byte) 0x8F;
+    /** Continuous burst count (BURST_COUNT) */
+    static private final byte BURST_COUNT_CONTINUOUS = (byte) 0xFF;
 
-    public void start() {
-        writeRegister(ACQ_CONFIG_REG,
-            ACQ_BIT_QUICK_TERM | ACQ_BIT_MEASURE_DELAY);
-        writeRegister(OUTER_LOOP_COUNT, 0xFF);   
-        writeRegister(ACQ_COMMAND, ACQ_CMD_MEASURE);
+    /** Disable measurement reference process (ACQ_CONFIG flag) */
+    static private final int ACQ_CFG_REF_PROCESS_DISABLE = 1 << 6;
+
+    /** Use MEASURE_DELAY instead of default 10 Hz rate (ACQ_CONFIG flag) */
+    static private final int ACQ_CFG_MEASURE_DELAY = 1 << 5;
+
+    /** Disable reference filter, avg of 8 measurements (ACQ_CONFIG flag) */
+    static private final int ACQ_CFG_REF_FILTER_DISABLE = 1 << 4;
+
+    /** Disable quick termination of measurements (ACQ_CONFIG flag) */
+    static private final int ACQ_CFG_QUICK_TERM_DISABLE = 1 << 3;
+
+    /** Use REF_COUNT_VAL instead of default 5 (ACQ_CONFIG flag) */
+    static private final int ACQ_CFG_REF_COUNT = 1 << 2;
+
+    /** Configuration mode bits */
+    static private final int ACQ_CFG_MODE = 0x03;
+    static private final int ACQ_CFG_MODE_PWM = 0x00;
+    static private final int ACQ_CFG_MODE_STATUS_PIN = 0x01;
+    static private final int ACQ_CFG_MODE_DELAY_PWN = 0x02;
+    static private final int ACQ_CFG_MODE_OSCILLATOR = 0x03;
+
+    /** Write a value to a register */
+    private boolean write(Register reg, int value) {
+        lidar.write(reg.register, (byte) value);
     }
 
-    public void stop() {
-        writeRegister(OUTER_LOOP_COUNT, 0x00);
+    /** Read a byte value from a register */
+    private int readByte(Register reg) {
+        if (lidar.read(reg.register, 1, buf))
+            return -1;
+        else
+            return ((int) buf.get(0)) & 0xFF;
     }
 
-    public short getDistance() {
-        return readShort(MEASUREMENT);
+    /** Read a short value from 2 successive registers */
+    private int readShort(Register reg) {
+        if (lidar.read(reg.bulk(), 2, buf))
+            return -1;
+        else
+            return ((int) buf.getShort(0)) & 0xFFFF;
     }
 
-    private void writeRegister(int address, int value) {
-        lidar.write((byte) address, (byte) value);
+    /** Start continuous measurement */
+    public boolean startContinuous() {
+        return write(Register.ACQ_CONFIG, ACQ_CFG_QUICK_TERM_DISABLE)
+            || write(Register.BURST_COUNT, BURST_COUNT_CONTINUOUS)
+            || write(Register.ACQ_COMMAND, ACQ_CMD_MEASURE);
     }
 
-    private short readShort(int address) {
-        lidar.read((byte) address, 2, buf);
-        return buf.getShort(0);
+    /** Stop continuous measurement */
+    public boolean stopContinuous() {
+        return write(Register.BURST_COUNT, 0);
+    }
+
+    /** Get sensor status flags */
+    public int getStatus() {
+        return readByte(Register.STATUS);
+    }
+
+    /** Get a distance measurement */
+    public int getDistance() {
+        return readShort(Register.DISTANCE_MSB);
     }
 }

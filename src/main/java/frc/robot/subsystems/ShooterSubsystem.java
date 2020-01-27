@@ -3,8 +3,9 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ShooterSubsystem extends SubsystemBase {
 
@@ -20,13 +21,36 @@ public class ShooterSubsystem extends SubsystemBase {
     static private final double PER_MINUTE_100_MS = 600.0;
 
     private final TalonSRX srx;
-    private final LidarLite lidar;
+    private int distance = 0;
+    private int status = 0;
+
+    /** Thread for I2C communication */
+    private final Thread i2c_thread = new Thread() {
+        @Override
+        public void run() {
+            LidarLite lidar = new LidarLite();
+            lidar.startContinuous();
+            while (true) {
+                for (int i = 0; i < 10; i++) {
+                    int d = lidar.getDistance();
+                    if (d >= 0)
+                        distance = d;
+                    else {
+                        System.err.println("Error reading distance");
+                        break;
+                    }
+                    Timer.sleep(0.1);
+                }
+                status = lidar.getStatus();
+            }
+            lidar.stopContinuous();
+        }
+    }
 
     public ShooterSubsystem() {
         super();
         srx = new TalonSRX(12);
-        lidar = new LidarLite();
-        lidar.start();
+        i2c_thread.start();
         /*
         srx.configFactoryDefault();
         srx.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder,
@@ -47,7 +71,8 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     public void periodic() {
-        SmartDashboard.putNumber("Distance", lidar.getDistance());
+        SmartDashboard.putNumber("Distance", distance);
+        SmartDashboard.putNumber("Status", status);
 /*        double output = srx.getMotorOutputPercent();
         SmartDashboard.putNumber("Output", output);
         int velocity = srx.getSelectedSensorVelocity(PID_LOOP_IDX);
