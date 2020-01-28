@@ -100,6 +100,9 @@ public class LidarLite {
     static private final int ACQ_CFG_MODE_DELAY_PWN = 0x02;
     static private final int ACQ_CFG_MODE_OSCILLATOR = 0x03;
 
+    /** Offset of distance readings */
+    static private final int DISTANCE_OFFSET = 952;
+
     /** Write a value to a register */
     private boolean write(Register reg, int value) {
         return lidar.write(reg.register, (byte) value);
@@ -123,7 +126,9 @@ public class LidarLite {
 
     /** Start continuous measurement */
     public boolean startContinuous() {
-        return write(Register.ACQ_CONFIG, ACQ_CFG_QUICK_TERM_DISABLE)
+        return write(Register.MEASURE_DELAY, 10)
+            || write(Register.ACQ_CONFIG, ACQ_CFG_QUICK_TERM_DISABLE |
+                                          ACQ_CFG_MEASURE_DELAY)
             || write(Register.BURST_COUNT, BURST_COUNT_CONTINUOUS)
             || write(Register.ACQ_COMMAND, ACQ_CMD_MEASURE);
     }
@@ -140,6 +145,12 @@ public class LidarLite {
 
     /** Get a distance measurement */
     public int getDistance() {
-        return readShort(Register.DISTANCE_MSB);
+        int d = readShort(Register.DISTANCE_MSB);
+        if (d < 0)
+            return d;
+        else if (d >= DISTANCE_OFFSET)
+            return d - DISTANCE_OFFSET;
+        else
+            return -2;
     }
 }

@@ -3,6 +3,8 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+
+import edu.wpi.first.wpilibj.MedianFilter;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -21,7 +23,7 @@ public class ShooterSubsystem extends SubsystemBase {
     static private final double PER_MINUTE_100_MS = 600.0;
 
     private final TalonSRX srx;
-    private int distance = 0;
+    private double distance = 0;
     private int status = 0;
 
     /** Thread for I2C communication */
@@ -29,17 +31,19 @@ public class ShooterSubsystem extends SubsystemBase {
         @Override
         public void run() {
             LidarLite lidar = new LidarLite();
+            MedianFilter mfilter = new MedianFilter(5);
             lidar.startContinuous();
             while (true) {
-                for (int i = 0; i < 10; i++) {
+                for (int i = 0; i < 20; i++) {
                     int d = lidar.getDistance();
-                    if (d >= 0)
-                        distance = d;
-                    else {
+                    if (d >= 0) {
+                        distance = mfilter.calculate(d);
+                    } else {
+                        mfilter.reset();
                         System.err.println("Error reading distance");
                         break;
                     }
-                    Timer.delay(0.1);
+                    Timer.delay(0.05);
                 }
                 status = lidar.getStatus();
             }
