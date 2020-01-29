@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.I2C;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 /** Class for LIDAR Lite v3 */
 public class LidarLite {
@@ -58,6 +59,7 @@ public class LidarLite {
 
     /** Create a new Lidar Lite */
     public LidarLite() {
+        buf.order(ByteOrder.BIG_ENDIAN);
         write(Register.ACQ_COMMAND, ACQ_CMD_RESET);
     }
 
@@ -101,7 +103,7 @@ public class LidarLite {
     static private final int ACQ_CFG_MODE_OSCILLATOR = 0x03;
 
     /** Offset of distance readings */
-    static private final int DISTANCE_OFFSET = 952;
+    static private final int DISTANCE_OFFSET = 962;
 
     /** Write a value to a register */
     private boolean write(Register reg, int value) {
@@ -150,7 +152,11 @@ public class LidarLite {
             return d;
         else if (d >= DISTANCE_OFFSET)
             return d - DISTANCE_OFFSET;
-        else
+        else {
+            // Some error codes: 1, 210, 217-222, 232,
+            // 234, 236, 237, 769, 773 ???
+            System.err.println("Error reading distance: " + d);
             return -2;
+        }
     }
 }

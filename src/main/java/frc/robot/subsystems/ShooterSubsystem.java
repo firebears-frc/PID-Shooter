@@ -40,7 +40,6 @@ public class ShooterSubsystem extends SubsystemBase {
                         distance = mfilter.calculate(d);
                     } else {
                         mfilter.reset();
-                        System.err.println("Error reading distance");
                         break;
                     }
                     Timer.delay(0.05);
