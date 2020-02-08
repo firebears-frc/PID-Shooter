@@ -1,6 +1,8 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.I2C;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -158,5 +160,36 @@ public class LidarLite {
             System.err.println("Error reading distance: " + d);
             return -2;
         }
+    }
+
+    double wheel_speed = 0.0079756; // the number of m/s that one rpm is equal to
+    double loss_rate = 0.45; // estamated loss rate 
+    double nedded_rpm; // needed rpm for desired velocity of ball
+
+    public static double optial_velocity (double range)
+    {
+        for(int i = 1; i < Data45.TABLE.length; i++)
+        {
+            if(Data45.TABLE[i][0]>range)
+            {
+                return Data45.TABLE[i-1][1];
+            }
+        }
+        return 0;
+    }
+
+    double desired_velocity = optial_velocity(getDistance());
+
+    public double calc () 
+    {
+        nedded_rpm = (desired_velocity / wheel_speed) * loss_rate;
+        return nedded_rpm;
+    }
+
+    public void periodic() 
+    {
+        SmartDashboard.putNumber("Velocity Needed", desired_velocity);
+        SmartDashboard.putNumber("RPM Needed", nedded_rpm);
+
     }
 }
