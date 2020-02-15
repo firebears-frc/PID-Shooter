@@ -1,8 +1,6 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.FeedbackDevice;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+//import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 import edu.wpi.first.wpilibj.MedianFilter;
 import edu.wpi.first.wpilibj.Timer;
@@ -22,7 +20,7 @@ public class ShooterSubsystem extends SubsystemBase {
     static private final double GEAR_RATIO = 13.56;
     static private final double PER_MINUTE_100_MS = 600.0;
 
-    private final TalonSRX srx;
+//    private final TalonSRX srx;
     private double distance = 0;
     private int status = 0;
 
@@ -50,8 +48,7 @@ public class ShooterSubsystem extends SubsystemBase {
     };
 
     public ShooterSubsystem() {
-        super();
-        srx = new TalonSRX(12);
+//        srx = new TalonSRX(12);
         i2c_thread.start();
         /*
         srx.configFactoryDefault();
