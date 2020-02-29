@@ -8,15 +8,16 @@ import frc.robot.subsystems.Vision;
 public class RobotContainer {
 
     private final ShooterSubsystem shooterSubsystem;
-    public final Vision vision;
+//   public final Vision vision;
 
     public RobotContainer() {
         shooterSubsystem = new ShooterSubsystem();
         shooterSubsystem.setDefaultCommand(getAutonomousCommand());
-        vision = new Vision();
+//        vision = new Vision();
     }
 
     public Command getAutonomousCommand() {
+//        return null;
         return new RunCommand(
             () -> shooterSubsystem.periodic(),
             shooterSubsystem

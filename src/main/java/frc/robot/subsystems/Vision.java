@@ -38,8 +38,13 @@ public class Vision extends SubsystemBase {
         visionTargetTable = NetworkTableInstance.getDefault().getTable(VISION_TARGET_TABLE_NAME);
     }
 
+    private long count = 0;
+
     @Override
     public void periodic() {
+        count++;
+        long stream = (count / 100) % 3;
+        
         SmartDashboard.putNumber(VISION_TARGET_ANGLE_X, getVisionTargetAngleX());
         SmartDashboard.putNumber(VISION_TARGET_DISTANCE, getVisionTargetDistance());
         SmartDashboard.putNumber(VISION_TARGET_WIDTH, getVisionTargetWidth());

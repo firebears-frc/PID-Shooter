@@ -1,6 +1,8 @@
 package frc.robot.subsystems;
 
-//import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 
 import edu.wpi.first.wpilibj.MedianFilter;
 import edu.wpi.first.wpilibj.Timer;
@@ -20,7 +22,7 @@ public class ShooterSubsystem extends SubsystemBase {
     static private final double GEAR_RATIO = 13.56;
     static private final double PER_MINUTE_100_MS = 600.0;
 
-//    private final TalonSRX srx;
+    private final TalonSRX srx;
     private double distance = 0;
     private int status = 0;
 
@@ -48,9 +50,9 @@ public class ShooterSubsystem extends SubsystemBase {
     };
 
     public ShooterSubsystem() {
-//        srx = new TalonSRX(12);
+        srx = new TalonSRX(16);
         i2c_thread.start();
-        /*
+        
         srx.configFactoryDefault();
         srx.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder,
                                          PID_LOOP_IDX,
@@ -66,13 +68,12 @@ public class ShooterSubsystem extends SubsystemBase {
         srx.config_kI(PID_LOOP_IDX, I, TIMEOUT_MS);
         srx.config_kD(PID_LOOP_IDX, D, TIMEOUT_MS);
         srx.config_kF(PID_LOOP_IDX, F, TIMEOUT_MS);
-*/
     }
 
     public void periodic() {
         SmartDashboard.putNumber("Distance", distance);
         SmartDashboard.putNumber("Status", status);
-/*        double output = srx.getMotorOutputPercent();
+        double output = srx.getMotorOutputPercent();
         SmartDashboard.putNumber("Output", output);
         int velocity = srx.getSelectedSensorVelocity(PID_LOOP_IDX);
         SmartDashboard.putNumber("Velocity", velocity);
@@ -80,6 +81,5 @@ public class ShooterSubsystem extends SubsystemBase {
         double targetVelocity = RPM * SENSOR_UNITS_PER_REV
             / (PER_MINUTE_100_MS * GEAR_RATIO);
         srx.set(ControlMode.Velocity, targetVelocity);
-    */
     }
 }
