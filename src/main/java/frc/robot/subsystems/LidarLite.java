@@ -10,6 +10,12 @@ import java.nio.ByteOrder;
 import java.io.FileReader;
 import java.io.BufferedReader;
 
+/*
+EX. how to get the rpm that you need
+double desired_velocity = LidarLite.optimal_velocity(LidarLite.getDistance() / 100.0);
+double rpm = LidarLite.calcRpm(desired_velocity);
+*/
+
 /** Class for LIDAR Lite v3 */
 public class LidarLite extends SubsystemBase {
 
@@ -468,7 +474,7 @@ public class LidarLite extends SubsystemBase {
 
     };
 
-    public double optial_velocity (double range)
+    public double optimal_velocity (double range)
     {
         for(int i = 1; i < array.length; i++)
         {
@@ -482,17 +488,23 @@ public class LidarLite extends SubsystemBase {
 
     
 
-    public double calc (double desired_velocity)
+    public double calcRpm (double desired_velocity)
     {
         nedded_rpm = (desired_velocity / wheel_speed) * loss_rate;
         return nedded_rpm;
+
     }
 
     public void periodic() 
     {
-        double desired_velocity = optial_velocity(getDistance()/100.0);
+        double desired_velocity = optimal_velocity(getDistance() / 100.0);
         SmartDashboard.putNumber("Velocity Needed", desired_velocity);
-        SmartDashboard.putNumber("RPM Needed", calc(desired_velocity));
+        SmartDashboard.putNumber("RPM Needed", calcRpm(desired_velocity));
 
     }
+        /*
+        EX. how to get the rpm that you need
+        double desired_velocity = LidarLite.optimal_velocity(LidarLite.getDistance() / 100.0);
+        double rpm = LidarLite.calcRpm(desired_velocity);
+        */
 }
